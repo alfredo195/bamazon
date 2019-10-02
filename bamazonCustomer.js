@@ -1,98 +1,74 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require("cli-table");
 
-// create the connection information for the sql database
 var connection = mysql.createConnection({
-  host: "localhost",
-
-  // Your port; if not 3306
-  port: 3306,
-
-  // Your username
-  user: "root",
-
-  // Your password
-  password: "password",
-  database: "bamazon"
+	host:"localhost",
+	port:3306,
+	user:"root",
+	password:"password",
+	database:"bamazon"
 });
 
-connection.connect(function(err) {
-    if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
-    start();
-  });
+connection.connect(function(err){
+	if(err)throw err;
+	console.log("connected as id" + connection.threadId);
+});
 
-  function start() {
-      inquirer
-      .prompt({
-          name: "buySomething",
-          type: "list",
-          message: "Would you like to enter the store? [YES] or [NO]",
-          choices: ["YES", "NO", "EXIT"]
-      })
-      .then(function(answer){
-          if(answer.buySomething === "YES"){
-              openStore()
-          }else{
-              connection.end()
-          }
-      })
-    }
+var displayProducts = function(){
+	var query = "Select * FROM products";
+	connection.query(query, function(err, res){
+		if(err) throw err;
+		var displayTable = new Table ({
+			head: ["Item ID", "Product Name", "Catergory", "Price", "Quantity"],
+			colWidths: [10,25,25,10,14]
+		});
+		for(var i = 0; i < res.length; i++){
+			displayTable.push(
+				[res[i].item_id,res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]
+				);
+		}
+		console.log(displayTable.toString());
+		purchasePrompt();
+	});
+}
 
-  function openStore(){
-      connection.query("SELECT * FROM products", function(err, res){
-        if(err) throw err;
+function purchasePrompt(){
+	inquirer.prompt([
+	{
+		name: "ID",
+		type: "input",
+		message:"Please enter Item ID you like to purhcase.",
+		filter:Number
+	},
+	{
+		name:"Quantity",
+		type:"input",
+		message:"How many items do you wish to purchase?",
+		filter:Number
+	},
 
-        inquirer
-        .prompt([
-          {
-            name: "choice",
-            type: "rawlist",
-            choices: function() {
-              var choiceArray = [];
-              for (var i = 0; i < res.length; i++){
-                choiceArray.push(res[i].product_name);
-              }
-              return choiceArray;
-            },
-            message: " What would you like to buy?"
-          },
-          {
-            name: "item",
-            type: "input",
-            message: "how many would you like to buy?"
-          }
-        ])
-        .then(function(answer){
-          var pickedItem
-          for (var i =0; i < res.length; i++){
-            if(results[i].product_name === answer.choice){
-              pickedItem = res[i];
-            }
-          }
+ ]).then(function(answers){
+ 	var quantityNeeded = answers.Quantity;
+ 	var IDrequested = answers.ID;
+ 	purchaseOrder(IDrequested, quantityNeeded);
+ });
+};
 
-          if(pickedItem.item > parseInt(answer.stock_quantity)){
-            connection.query(
-              "UPDATE products SET ? WHERE?",
-              [
-                {
-                  stock_quantity: answer.item
-                }
-              ],
-              function(err){
-                if(err) throw err;
-                console.log("your purchase was successful!");
-                console.table(res)
-                start();
-              }
-            )
-          }
-          else{
-            console.log("not enough in stock try again")
-            start()
-          }
-        })
-      })
+function purchaseOrder(ID){
+	connection.query('Select * FROM products WHERE item_id = ' + ID, function(err,res){
+		if(err){console.log(err)};
+		if(ID <= res[0].stock_quantity){
+			var totalCost = res[0].price ;
+			console.log("Good news your order is in stock!");
+			console.log("Your total cost for "  + " " +res[0].product_name + " is " + totalCost + " Thank you!");
 
-  }
-  
+			connection.query("UPDATE products SET stock_quantity = stock_quantity - "  + "WHERE item_id = " + ID);
+		} else{
+			console.log("Insufficient quantity, sorry we do not have enough " + res[0].product_name + "to complete your order.");
+		};
+		displayProducts();
+	});
+};
+
+displayProducts(); 
