@@ -13,9 +13,28 @@ var connection = mysql.createConnection({
 connection.connect(function(err){
 	if(err)throw err;
 	console.log("connected as id" + connection.threadId);
+	start();
 });
 
-var displayProducts = function(){
+function start() {
+	inquirer
+	.prompt({
+		name: "buySomething",
+		type: "list",
+		message: "Would you like to enter the store? [YES] or [NO]",
+		choices: ["YES", "NO"]
+	})
+	.then(function(answer){
+		if(answer.buySomething === "YES"){
+			displayProducts()
+		}else{
+			connection.end()
+		}
+	})
+  }
+
+
+   function displayProducts (){
 	var query = "Select * FROM products";
 	connection.query(query, function(err, res){
 		if(err) throw err;
@@ -67,8 +86,7 @@ function purchaseOrder(ID, amtNeeded){
 		} else{
 			console.log("Insufficient quantity, sorry we do not have enough " + res[0].product_name + "to complete your order.");
 		};
-		displayProducts();
+		start();
 	});
 };
 
-displayProducts(); 
