@@ -5,7 +5,7 @@ The user will be prompted with a welcome page saying if you would like to like t
 
 If user selects "no" the app closes and brings you back to your console.
 
-![dont want to enter the store](images/bamazonNo.png)
+![dont want to enter the store](images/bamazonNO.png)
 
 If the user selects "yes" the app will then sow a table of the available products to buy, it will show name of the item, department, price, and the stock available.
 
