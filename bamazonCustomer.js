@@ -20,7 +20,7 @@ var displayProducts = function(){
 	connection.query(query, function(err, res){
 		if(err) throw err;
 		var displayTable = new Table ({
-			head: ["Item ID", "Product Name", "Catergory", "Price", "Quantity"],
+			head: ["Item ID", "Product Name", "Department", "Price", "Quantity"],
 			colWidths: [10,25,25,10,14]
 		});
 		for(var i = 0; i < res.length; i++){
@@ -38,7 +38,7 @@ function purchasePrompt(){
 	{
 		name: "ID",
 		type: "input",
-		message:"Please enter Item ID you like to purhcase.",
+		message:"Please enter Item ID you like to purchase.",
 		filter:Number
 	},
 	{
@@ -55,15 +55,15 @@ function purchasePrompt(){
  });
 };
 
-function purchaseOrder(ID){
+function purchaseOrder(ID, amtNeeded){
 	connection.query('Select * FROM products WHERE item_id = ' + ID, function(err,res){
 		if(err){console.log(err)};
-		if(ID <= res[0].stock_quantity){
-			var totalCost = res[0].price ;
+		if(amtNeeded <= res[0].stock_quantity){
+			var totalCost = res[0].price * amtNeeded;
 			console.log("Good news your order is in stock!");
-			console.log("Your total cost for "  + " " +res[0].product_name + " is " + totalCost + " Thank you!");
+			console.log("Your total cost for " + amtNeeded + " " +res[0].product_name + " is " + totalCost + " Thank you!");
 
-			connection.query("UPDATE products SET stock_quantity = stock_quantity - "  + "WHERE item_id = " + ID);
+			connection.query("UPDATE products SET stock_quantity = " + "stock_quantity - " + amtNeeded + " WHERE item_id = " + ID);
 		} else{
 			console.log("Insufficient quantity, sorry we do not have enough " + res[0].product_name + "to complete your order.");
 		};
