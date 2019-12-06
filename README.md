@@ -7,11 +7,11 @@ If user selects "no" the app closes and brings you back to your console.
 
 ![dont want to enter the store](images/bamazonNO.png)
 
-If the user selects "yes" the app will then sow a table of the available products to buy, it will show name of the item, department, price, and the stock available.
+If the user selects "yes" the app will then show a table of the available products to buy, it will show name of the item, department, price, and the stock available.
 
 ![they do want to enter the store](images/bamazonYes.png)
 
-After the that the user will be asked what it em the will would like to buy, they will select the item by the id of the item.
+After that the user will be asked what it em the will would like to buy, they will select the item by the id of the item.
 
 ![user asked what they want to buy](images/bamazonWhat.png)
 
